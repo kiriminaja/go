@@ -23,12 +23,19 @@ const (
 	InstantServiceGosend      InstantService = "gosend"
 )
 
+type InstantVehicle string 
+
+const (
+	InstantVehicleMotor InstantVehicle = "motor"
+	InstantVehicleCar   InstantVehicle = "mobil"
+)
+
 type PricingInstantPayload struct {
 	Service     []InstantService              `json:"service"`
 	ItemPrice   float64                       `json:"item_price"`
 	Origin      PricingInstantLocationPayload `json:"origin"`
 	Destination PricingInstantLocationPayload `json:"destination"`
 	Weight      int                           `json:"weight"`
-	Vehicle     string                        `json:"vehicle"`
+	Vehicle     InstantVehicle                `json:"vehicle"`
 	Timezone    string                        `json:"timezone"`
 }

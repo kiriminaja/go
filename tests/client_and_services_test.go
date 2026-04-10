@@ -176,7 +176,7 @@ func TestPricingInstantEndpoint(t *testing.T) {
 		Origin:      types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "A"},
 		Destination: types.PricingInstantLocationPayload{Lat: -6.21, Long: 106.81, Address: "B"},
 		Weight:      1000,
-		Vehicle:     "bike",
+		Vehicle:     types.InstantVehicleMotor,
 		Timezone:    "Asia/Jakarta",
 	}
 	client.CoverageArea.PricingInstant(payload)
