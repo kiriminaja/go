@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  update-pkg-go-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Update pkg.go.dev
+        run: GOPROXY=https://proxy.golang.org go list -m github.com/kiriminaja/go@${GITHUB_REF_NAME}
