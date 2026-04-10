@@ -28,10 +28,6 @@ func (s *Service) Cancel(awb, reason string) (*types.CancelExpressOrderResponse,
 	})
 }
 
-func (s *Service) RequestPickupV5(payload any) (*types.KAResponse, error) {
-	return kahttp.PostJSON[types.KAResponse](s.client, "/api/mitra/v5/request_pickup", payload)
-}
-
-func (s *Service) RequestPickupV61(payload any) (*types.KAResponse, error) {
+func (s *Service) RequestPickup(payload any) (*types.KAResponse, error) {
 	return kahttp.PostJSON[types.KAResponse](s.client, "/api/mitra/v6.1/request_pickup", payload)
 }

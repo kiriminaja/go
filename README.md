@@ -134,11 +134,8 @@ client.Order.Express.Track("ORDER123")
 // Cancel by AWB
 client.Order.Express.Cancel("AWB123456", "Customer request")
 
-// Request pickup (v5)
-client.Order.Express.RequestPickupV5(payload)
-
-// Request pickup (v6.1)
-client.Order.Express.RequestPickupV61(payload)
+// Request pickup
+client.Order.Express.RequestPickup(payload)
 ```
 
 ---

@@ -206,21 +206,10 @@ func TestExpressTrackEndpoint(t *testing.T) {
 	assertEqual(t, transport.calls[0].Body, `{"order_id":"OID_EXP_1"}`)
 }
 
-func TestExpressRequestPickupV5Endpoint(t *testing.T) {
+func TestExpressRequestPickupEndpoint(t *testing.T) {
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := map[string]any{"foo": "bar"}
-	client.Order.Express.RequestPickupV5(payload)
-	assertContains(t, transport.calls[0].URL, "/api/mitra/v5/request_pickup")
-	assertEqual(t, transport.calls[0].Method, "POST")
-	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
-	expected, _ := json.Marshal(payload)
-	assertEqual(t, transport.calls[0].Body, string(expected))
-}
-
-func TestExpressRequestPickupV61Endpoint(t *testing.T) {
-	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	payload := map[string]any{"baz": float64(123)}
-	client.Order.Express.RequestPickupV61(payload)
+	client.Order.Express.RequestPickup(payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.1/request_pickup")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
