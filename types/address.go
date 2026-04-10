@@ -15,8 +15,16 @@ type PricingInstantLocationPayload struct {
 	Address string  `json:"address"`
 }
 
+type InstantService string
+
+const (
+	InstantServiceGrabExpress InstantService = "grab_express"
+	InstantServiceBorzo       InstantService = "borzo"
+	InstantServiceGosend      InstantService = "gosend"
+)
+
 type PricingInstantPayload struct {
-	Service     []string                      `json:"service"`
+	Service     []InstantService              `json:"service"`
 	ItemPrice   float64                       `json:"item_price"`
 	Origin      PricingInstantLocationPayload `json:"origin"`
 	Destination PricingInstantLocationPayload `json:"destination"`

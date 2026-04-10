@@ -171,7 +171,7 @@ func TestPricingExpressEndpoint(t *testing.T) {
 func TestPricingInstantEndpoint(t *testing.T) {
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.PricingInstantPayload{
-		Service:     []string{"instant"},
+		Service:     []types.InstantService{types.InstantServiceGrabExpress},
 		ItemPrice:   10000,
 		Origin:      types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "A"},
 		Destination: types.PricingInstantLocationPayload{Lat: -6.21, Long: 106.81, Address: "B"},
