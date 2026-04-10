@@ -176,7 +176,7 @@ func TestPricingInstantEndpoint(t *testing.T) {
 		Origin:      types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "A"},
 		Destination: types.PricingInstantLocationPayload{Lat: -6.21, Long: 106.81, Address: "B"},
 		Weight:      1000,
-		Vehicle:     types.InstantVehicleMotor,
+		Vehicle:     types.InstantVehicleBike,
 		Timezone:    "Asia/Jakarta",
 	}
 	client.CoverageArea.PricingInstant(payload)
@@ -208,7 +208,33 @@ func TestExpressTrackEndpoint(t *testing.T) {
 
 func TestExpressRequestPickupEndpoint(t *testing.T) {
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	payload := map[string]any{"foo": "bar"}
+	payload := types.RequestPickupPayload{
+		Address:     "Jl. Jodipati No.29",
+		Phone:       "08133345678",
+		Name:        "Tokotries",
+		KecamatanID: 548,
+		Schedule:    "2021-11-30 22:00:00",
+		Packages: []types.RequestPickupPackage{
+			{
+				OrderID:                "YGL-000000019",
+				DestinationName:        "Flag Test",
+				DestinationPhone:       "082223323333",
+				DestinationAddress:     "Jl. Magelang KM 11",
+				DestinationKecamatanID: 548,
+				Weight:                 520,
+				Width:                  8,
+				Length:                 8,
+				Height:                 8,
+				ItemValue:              275000,
+				ShippingCost:           65000,
+				Service:                "jne",
+				ServiceType:            "REG23",
+				COD:                    0,
+				PackageTypeID:          7,
+				ItemName:               "TEST Item name",
+			},
+		},
+	}
 	client.Order.Express.RequestPickup(payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.1/request_pickup")
 	assertEqual(t, transport.calls[0].Method, "POST")
@@ -226,9 +252,34 @@ func TestInstantTrackEndpoint(t *testing.T) {
 
 func TestInstantCreateEndpoint(t *testing.T) {
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	payload := map[string]any{
-		"origin":      map[string]any{"address": "A"},
-		"destination": map[string]any{"address": "B"},
+	payload := types.InstantPickupPayload{
+		Service:     types.InstantServiceGosend,
+		ServiceType: "instant",
+		Vehicle:     types.InstantVehicleBike,
+		OrderPrefix: "BDI",
+		Packages: []types.InstantPickupPackage{
+			{
+				OriginName:             "Rizky",
+				OriginPhone:            "081280045616",
+				OriginLat:              -7.854584,
+				OriginLong:             110.331154,
+				OriginAddress:          "Wirobrajan, Yogyakarta",
+				OriginAddressNote:      "Dekat Kantor",
+				DestinationName:        "Okka",
+				DestinationPhone:       "081280045616",
+				DestinationLat:         -7.776192,
+				DestinationLong:        110.325053,
+				DestinationAddress:     "Godean, Sleman",
+				DestinationAddressNote: "Dekat Pasar",
+				ShippingPrice:          34000,
+				Item: types.InstantPickupItem{
+					Name:        "Barang 1",
+					Description: "Barang 1 Description",
+					Price:       20000,
+					Weight:      1000,
+				},
+			},
+		},
 	}
 	client.Order.Instant.Create(payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/pickup/request")

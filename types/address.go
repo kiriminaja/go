@@ -23,11 +23,11 @@ const (
 	InstantServiceGosend      InstantService = "gosend"
 )
 
-type InstantVehicle string 
+type InstantVehicle string
 
 const (
-	InstantVehicleMotor InstantVehicle = "motor"
-	InstantVehicleCar   InstantVehicle = "mobil"
+	InstantVehicleBike InstantVehicle = "motor"
+	InstantVehicleCar  InstantVehicle = "mobil"
 )
 
 type PricingInstantPayload struct {

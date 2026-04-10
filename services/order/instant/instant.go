@@ -15,7 +15,7 @@ func New(client *kahttp.Client) *Service {
 	return &Service{client: client}
 }
 
-func (s *Service) Create(payload any) (*types.CreateInstantPickupResponse, error) {
+func (s *Service) Create(payload types.InstantPickupPayload) (*types.CreateInstantPickupResponse, error) {
 	return kahttp.PostJSON[types.CreateInstantPickupResponse](s.client, "/api/mitra/v4/instant/pickup/request", payload)
 }
 

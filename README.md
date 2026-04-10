@@ -113,13 +113,13 @@ client.CoverageArea.PricingExpress(types.PricingExpressPayload{
 
 // Instant (same-day) rates
 client.CoverageArea.PricingInstant(types.PricingInstantPayload{
-    Service:   []string{"instant"},
-    ItemPrice: 10000,
-    Origin:    types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "Jl. Sudirman No.1"},
+    Service:     []types.InstantService{types.InstantServiceGosend},
+    ItemPrice:   10000,
+    Origin:      types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "Jl. Sudirman No.1"},
     Destination: types.PricingInstantLocationPayload{Lat: -6.21, Long: 106.81, Address: "Jl. Thamrin No.5"},
-    Weight:    1000,
-    Vehicle:   "motor",
-    Timezone:  "Asia/Jakarta",
+    Weight:      1000,
+    Vehicle:     types.InstantVehicleBike,
+    Timezone:    "Asia/Jakarta",
 })
 ```
 
@@ -135,7 +135,33 @@ client.Order.Express.Track("ORDER123")
 client.Order.Express.Cancel("AWB123456", "Customer request")
 
 // Request pickup
-client.Order.Express.RequestPickup(payload)
+client.Order.Express.RequestPickup(types.RequestPickupPayload{
+    Address:     "Jl. Jodipati No.29",
+    Phone:       "08133345678",
+    Name:        "Tokotries",
+    KecamatanID: 548,
+    Schedule:    "2021-11-30 22:00:00",
+    Packages: []types.RequestPickupPackage{
+        {
+            OrderID:                "YGL-000000019",
+            DestinationName:        "Flag Test",
+            DestinationPhone:       "082223323333",
+            DestinationAddress:     "Jl. Magelang KM 11",
+            DestinationKecamatanID: 548,
+            Weight:                 520,
+            Width:                  8,
+            Length:                 8,
+            Height:                 8,
+            ItemValue:              275000,
+            ShippingCost:           65000,
+            Service:                "jne",
+            ServiceType:            "REG23",
+            COD:                    0,
+            PackageTypeID:          7,
+            ItemName:               "TEST Item name",
+        },
+    },
+})
 ```
 
 ---
@@ -144,7 +170,35 @@ client.Order.Express.RequestPickup(payload)
 
 ```go
 // Create instant pickup
-client.Order.Instant.Create(payload)
+client.Order.Instant.Create(types.InstantPickupPayload{
+    Service:     types.InstantServiceGosend,
+    ServiceType: "instant",
+    Vehicle:     types.InstantVehicleBike,
+    OrderPrefix: "BDI",
+    Packages: []types.InstantPickupPackage{
+        {
+            OriginName:             "Rizky",
+            OriginPhone:            "081280045616",
+            OriginLat:              -7.854584,
+            OriginLong:             110.331154,
+            OriginAddress:          "Wirobrajan, Yogyakarta",
+            OriginAddressNote:      "Dekat Kantor",
+            DestinationName:        "Okka",
+            DestinationPhone:       "081280045616",
+            DestinationLat:         -7.776192,
+            DestinationLong:        110.325053,
+            DestinationAddress:     "Godean, Sleman",
+            DestinationAddressNote: "Dekat Pasar",
+            ShippingPrice:          34000,
+            Item: types.InstantPickupItem{
+                Name:        "Barang 1",
+                Description: "Barang 1 Description",
+                Price:       20000,
+                Weight:      1000,
+            },
+        },
+    },
+})
 
 // Find a new driver for an existing order
 client.Order.Instant.FindNewDriver("ORDER123")
