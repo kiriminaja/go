@@ -1,6 +1,7 @@
 # KiriminAja Go SDK
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/kiriminaja/go.svg)](https://pkg.go.dev/github.com/kiriminaja/go)
+[![Latest Version](https://img.shields.io/github/v/tag/kiriminaja/go?label=version&sort=semver)](https://github.com/kiriminaja/go/releases)
 [![license](https://img.shields.io/github/license/kiriminaja/go)](LICENSE)
 
 Official Go SDK for the [KiriminAja](https://kiriminaja.com) logistics API. Zero dependencies beyond the standard library.
