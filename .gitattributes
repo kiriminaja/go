@@ -1,0 +1,2 @@
+# Exclude playground from GitHub release archives
+playground/ export-ignore
