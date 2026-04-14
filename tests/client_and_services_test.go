@@ -158,7 +158,7 @@ func TestPricingExpressEndpoint(t *testing.T) {
 		Weight:      1000,
 		ItemValue:   5000,
 		Insurance:   0,
-		Courier:     []string{"jne"},
+		Courier:     []string{types.ExpressServiceJNE, "other"},
 	}
 	client.CoverageArea.PricingExpress(payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.1/shipping_price")
@@ -171,7 +171,7 @@ func TestPricingExpressEndpoint(t *testing.T) {
 func TestPricingInstantEndpoint(t *testing.T) {
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.PricingInstantPayload{
-		Service:     []types.InstantService{types.InstantServiceGrabExpress},
+		Service:     []types.InstantService{types.InstantServiceGrabExpress, "other"},
 		ItemPrice:   10000,
 		Origin:      types.PricingInstantLocationPayload{Lat: -6.2, Long: 106.8, Address: "A"},
 		Destination: types.PricingInstantLocationPayload{Lat: -6.21, Long: 106.81, Address: "B"},

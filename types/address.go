@@ -39,3 +39,24 @@ type PricingInstantPayload struct {
 	Vehicle     InstantVehicle                `json:"vehicle"`
 	Timezone    string                        `json:"timezone"`
 }
+
+type ExpressService = string
+
+const (
+	ExpressServiceTiki         ExpressService = "tiki"
+	ExpressServicePos          ExpressService = "posindonesia"
+	ExpressServicePaxel        ExpressService = "paxel"
+	ExpressServiceNinja        ExpressService = "ninja"
+	ExpressServiceRPX          ExpressService = "rpx"
+	ExpressServiceLionParcel   ExpressService = "lion"
+	ExpressServiceJTCargo      ExpressService = "jtcargo"
+	ExpressServiceSentralCargo ExpressService = "sentral"
+	ExpressServiceAnterAja     ExpressService = "anteraja"
+	ExpressServiceNCS          ExpressService = "ncs"
+	ExpressServiceSicepat      ExpressService = "sicepat"
+	ExpressServiceSAP          ExpressService = "sap"
+	ExpressServiceIDExpress    ExpressService = "idx"
+	ExpressServiceJNE          ExpressService = "jne"
+	ExpressServiceJNT          ExpressService = "jnt"
+	ExpressServiceSPX          ExpressService = "spx"
+)
