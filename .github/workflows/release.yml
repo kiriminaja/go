@@ -14,4 +14,12 @@ jobs:
           go-version: stable
 
       - name: Update pkg.go.dev
-        run: GOPROXY=https://proxy.golang.org go list -m github.com/kiriminaja/go@${GITHUB_REF_NAME}
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i..."
+            GOPROXY=https://proxy.golang.org go list -m github.com/kiriminaja/go@${GITHUB_REF_NAME} && exit 0
+            echo "Failed, retrying in 15s..."
+            sleep 15
+          done
+          echo "All attempts failed"
+          exit 1
