@@ -15,7 +15,7 @@ type CourierServiceItem struct {
 	Name         string  `json:"name"`
 	Code         string  `json:"code"`
 	CutOffTime   *string `json:"cut_off_time"`
-	Volumetrik   *string `json:"volumetrik"`
+	Volumetric   *string `json:"volumetrik"`
 	Rounded      *int    `json:"rounded"`
 	CourierGroup string  `json:"courier_group"`
 }

@@ -2,6 +2,7 @@ package kiriminaja
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/kiriminaja/go/config"
 	kahttp "github.com/kiriminaja/go/http"
@@ -20,6 +21,8 @@ const (
 	EnvSandbox    = config.EnvSandbox
 	EnvProduction = config.EnvProduction
 )
+
+const defaultTimeout = 30 * time.Second
 
 type Client struct {
 	Address      *address.Service
@@ -44,7 +47,7 @@ func New(cfg Config) *Client {
 
 	httpClient := cfg.HTTPClient
 	if httpClient == nil {
-		httpClient = http.DefaultClient
+		httpClient = &http.Client{Timeout: defaultTimeout}
 	}
 
 	kc := &kahttp.Client{

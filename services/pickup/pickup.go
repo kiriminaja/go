@@ -1,6 +1,8 @@
 package pickup
 
 import (
+	"context"
+
 	kahttp "github.com/kiriminaja/go/http"
 	"github.com/kiriminaja/go/types"
 )
@@ -13,6 +15,6 @@ func New(client *kahttp.Client) *Service {
 	return &Service{client: client}
 }
 
-func (s *Service) Schedules() (*types.PickupSchedulesResponse, error) {
-	return kahttp.PostJSON[types.PickupSchedulesResponse](s.client, "/api/mitra/v2/schedules", nil)
+func (s *Service) Schedules(ctx context.Context) (*types.PickupSchedulesResponse, error) {
+	return kahttp.PostJSON[types.PickupSchedulesResponse](ctx, s.client, "/api/mitra/v2/schedules", nil)
 }

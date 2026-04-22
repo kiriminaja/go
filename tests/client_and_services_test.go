@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	kiriminaja "github.com/kiriminaja/go"
+	kahttp "github.com/kiriminaja/go/http"
 	"github.com/kiriminaja/go/config"
 	"github.com/kiriminaja/go/types"
 )
@@ -21,14 +23,18 @@ type requestCall struct {
 }
 
 type mockTransport struct {
-	calls []requestCall
+	calls    []requestCall
+	response string
+	status   int
 }
 
 func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	var body string
 	if req.Body != nil {
-		data, _ := io.ReadAll(req.Body)
-		body = string(data)
+		data, err := io.ReadAll(req.Body)
+		if err == nil {
+			body = string(data)
+		}
 	}
 	m.calls = append(m.calls, requestCall{
 		Method: req.Method,
@@ -36,9 +42,17 @@ func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		Body:   body,
 		Header: req.Header.Clone(),
 	})
+	status := m.status
+	if status == 0 {
+		status = 200
+	}
+	resp := m.response
+	if resp == "" {
+		resp = `{"status":true}`
+	}
 	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(`{"status":true}`)),
+		StatusCode: status,
+		Body:       io.NopCloser(strings.NewReader(resp)),
 		Header:     http.Header{"Content-Type": []string{"application/json"}},
 	}, nil
 }
@@ -48,6 +62,17 @@ func newMockClient(env config.Env, apiKey string) (*kiriminaja.Client, *mockTran
 	client := kiriminaja.New(kiriminaja.Config{
 		Env:    env,
 		APIKey: apiKey,
+		HTTPClient: &http.Client{
+			Transport: transport,
+		},
+	})
+	return client, transport
+}
+
+func newMockClientWithResponse(env config.Env, status int, response string) (*kiriminaja.Client, *mockTransport) {
+	transport := &mockTransport{status: status, response: response}
+	client := kiriminaja.New(kiriminaja.Config{
+		Env:    env,
 		HTTPClient: &http.Client{
 			Transport: transport,
 		},
@@ -77,8 +102,9 @@ func assertEqual(t *testing.T, got, want string) {
 }
 
 func TestSandboxBaseURL(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.Provinces()
+	client.Address.Provinces(ctx)
 	if len(transport.calls) != 1 {
 		t.Fatalf("expected 1 call, got %d", len(transport.calls))
 	}
@@ -86,8 +112,9 @@ func TestSandboxBaseURL(t *testing.T) {
 }
 
 func TestProductionBaseURL(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvProduction, "")
-	client.Address.Provinces()
+	client.Address.Provinces(ctx)
 	if len(transport.calls) != 1 {
 		t.Fatalf("expected 1 call, got %d", len(transport.calls))
 	}
@@ -95,8 +122,9 @@ func TestProductionBaseURL(t *testing.T) {
 }
 
 func TestBearerToken(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "abc")
-	client.Address.Provinces()
+	client.Address.Provinces(ctx)
 	if len(transport.calls) != 1 {
 		t.Fatalf("expected 1 call, got %d", len(transport.calls))
 	}
@@ -105,15 +133,17 @@ func TestBearerToken(t *testing.T) {
 }
 
 func TestProvincesEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.Provinces()
+	client.Address.Provinces(ctx)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/province")
 	assertEqual(t, transport.calls[0].Method, "POST")
 }
 
 func TestCitiesEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.Cities(5)
+	client.Address.Cities(ctx, 5)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/city")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -122,8 +152,9 @@ func TestCitiesEndpoint(t *testing.T) {
 }
 
 func TestDistrictsEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.Districts(12)
+	client.Address.Districts(ctx, 12)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/kecamatan")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -132,8 +163,9 @@ func TestDistrictsEndpoint(t *testing.T) {
 }
 
 func TestSubDistrictsEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.SubDistricts(77)
+	client.Address.SubDistricts(ctx, 77)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/kelurahan")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -142,8 +174,9 @@ func TestSubDistrictsEndpoint(t *testing.T) {
 }
 
 func TestDistrictsByNameEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Address.DistrictsByName("jakarta")
+	client.Address.DistrictsByName(ctx, "jakarta")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v2/get_address_by_name")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -151,6 +184,7 @@ func TestDistrictsByNameEndpoint(t *testing.T) {
 }
 
 func TestPricingExpressEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.PricingExpressPayload{
 		Origin:      1,
@@ -158,9 +192,9 @@ func TestPricingExpressEndpoint(t *testing.T) {
 		Weight:      1000,
 		ItemValue:   5000,
 		Insurance:   0,
-		Courier:     []string{types.ExpressServiceJNE, "other"},
+		Courier:     []types.ExpressService{types.ExpressServiceJNE, "other"},
 	}
-	client.CoverageArea.PricingExpress(payload)
+	client.CoverageArea.PricingExpress(ctx, payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.1/shipping_price")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -169,6 +203,7 @@ func TestPricingExpressEndpoint(t *testing.T) {
 }
 
 func TestPricingInstantEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.PricingInstantPayload{
 		Service:     []types.InstantService{types.InstantServiceGrabExpress, "other"},
@@ -179,7 +214,7 @@ func TestPricingInstantEndpoint(t *testing.T) {
 		Vehicle:     types.InstantVehicleBike,
 		Timezone:    "Asia/Jakarta",
 	}
-	client.CoverageArea.PricingInstant(payload)
+	client.CoverageArea.PricingInstant(ctx, payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/pricing")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -188,8 +223,9 @@ func TestPricingInstantEndpoint(t *testing.T) {
 }
 
 func TestExpressCancelEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Order.Express.Cancel("AWB123", "reason here")
+	client.Order.Express.Cancel(ctx, "AWB123", "reason here")
 	u, _ := url.Parse(transport.calls[0].URL)
 	assertContains(t, u.Path, "/api/mitra/v3/cancel_shipment")
 	assertEqual(t, u.Query().Get("awb"), "AWB123")
@@ -198,8 +234,9 @@ func TestExpressCancelEndpoint(t *testing.T) {
 }
 
 func TestExpressTrackEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Order.Express.Track("OID_EXP_1")
+	client.Order.Express.Track(ctx, "OID_EXP_1")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/tracking")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -207,6 +244,7 @@ func TestExpressTrackEndpoint(t *testing.T) {
 }
 
 func TestExpressRequestPickupEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.RequestPickupPayload{
 		Address:     "Jl. Jodipati No.29",
@@ -235,7 +273,7 @@ func TestExpressRequestPickupEndpoint(t *testing.T) {
 			},
 		},
 	}
-	client.Order.Express.RequestPickup(payload)
+	client.Order.Express.RequestPickup(ctx, payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.1/request_pickup")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -244,13 +282,15 @@ func TestExpressRequestPickupEndpoint(t *testing.T) {
 }
 
 func TestInstantTrackEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Order.Instant.Track("OID123")
+	client.Order.Instant.Track(ctx, "OID123")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/tracking/OID123")
 	assertEqual(t, transport.calls[0].Method, "GET")
 }
 
 func TestInstantCreateEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
 	payload := types.InstantPickupPayload{
 		Service:     types.InstantServiceGosend,
@@ -281,7 +321,7 @@ func TestInstantCreateEndpoint(t *testing.T) {
 			},
 		},
 	}
-	client.Order.Instant.Create(payload)
+	client.Order.Instant.Create(ctx, payload)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/pickup/request")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -290,8 +330,9 @@ func TestInstantCreateEndpoint(t *testing.T) {
 }
 
 func TestInstantFindNewDriverEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Order.Instant.FindNewDriver("OID123")
+	client.Order.Instant.FindNewDriver(ctx, "OID123")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/pickup/find-new-driver")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -299,22 +340,25 @@ func TestInstantFindNewDriverEndpoint(t *testing.T) {
 }
 
 func TestInstantCancelEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Order.Instant.Cancel("OID123")
+	client.Order.Instant.Cancel(ctx, "OID123")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v4/instant/pickup/void/OID123")
 	assertEqual(t, transport.calls[0].Method, "DELETE")
 }
 
 func TestCourierListEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Courier.List()
+	client.Courier.List(ctx)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/couriers")
 	assertEqual(t, transport.calls[0].Method, "POST")
 }
 
 func TestCourierGroupEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Courier.Group()
+	client.Courier.Group(ctx)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/couriers_group")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Body, "")
@@ -322,8 +366,9 @@ func TestCourierGroupEndpoint(t *testing.T) {
 }
 
 func TestCourierDetailEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Courier.Detail("jne")
+	client.Courier.Detail(ctx, "jne")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/courier_services")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -331,8 +376,9 @@ func TestCourierDetailEndpoint(t *testing.T) {
 }
 
 func TestCourierSetWhitelistServicesEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Courier.SetWhitelistServices([]string{"jne_reg", "jne_yes"})
+	client.Courier.SetWhitelistServices(ctx, []string{"jne_reg", "jne_yes"})
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v3/set_whitelist_services")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
@@ -341,8 +387,9 @@ func TestCourierSetWhitelistServicesEndpoint(t *testing.T) {
 }
 
 func TestPickupSchedulesEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Pickup.Schedules()
+	client.Pickup.Schedules(ctx)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v2/schedules")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Body, "")
@@ -350,24 +397,150 @@ func TestPickupSchedulesEndpoint(t *testing.T) {
 }
 
 func TestPaymentGetPaymentEndpoint(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.Payment.GetPayment("PAY123")
+	client.Payment.GetPayment(ctx, "PAY123")
 	assertContains(t, transport.calls[0].URL, "/api/mitra/v2/get_payment")
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
 	assertEqual(t, transport.calls[0].Body, `{"payment_id":"PAY123"}`)
 }
 
-func TestCoverageAreaInheritsAddressMethods(t *testing.T) {
+func TestCoverageAreaDelegatesAddressMethods(t *testing.T) {
+	ctx := context.Background()
 	client, transport := newMockClient(kiriminaja.EnvSandbox, "")
-	client.CoverageArea.Provinces()
+	client.CoverageArea.Provinces(ctx)
 	assertContains(t, transport.calls[0].URL, "/api/mitra/province")
-	client.CoverageArea.Cities(1)
+	client.CoverageArea.Cities(ctx, 1)
 	assertContains(t, transport.calls[1].URL, "/api/mitra/city")
-	client.CoverageArea.Districts(1)
+	client.CoverageArea.Districts(ctx, 1)
 	assertContains(t, transport.calls[2].URL, "/api/mitra/kecamatan")
-	client.CoverageArea.SubDistricts(1)
+	client.CoverageArea.SubDistricts(ctx, 1)
 	assertContains(t, transport.calls[3].URL, "/api/mitra/kelurahan")
-	client.CoverageArea.DistrictsByName("test")
+	client.CoverageArea.DistrictsByName(ctx, "test")
 	assertContains(t, transport.calls[4].URL, "/api/mitra/v2/get_address_by_name")
+}
+
+// --- Negative tests ---
+
+func TestValidationEmptyOrderID(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Order.Express.Track(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty orderID, got nil")
+	}
+}
+
+func TestValidationEmptyAWB(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Order.Express.Cancel(ctx, "", "reason")
+	if err == nil {
+		t.Error("expected error for empty awb, got nil")
+	}
+}
+
+func TestValidationEmptyInstantOrderID(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Order.Instant.Track(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty orderID, got nil")
+	}
+	_, err = client.Order.Instant.Cancel(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty orderID, got nil")
+	}
+	_, err = client.Order.Instant.FindNewDriver(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty orderID, got nil")
+	}
+}
+
+func TestValidationEmptyPaymentID(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Payment.GetPayment(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty paymentID, got nil")
+	}
+}
+
+func TestValidationEmptyCourierCode(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Courier.Detail(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty courierCode, got nil")
+	}
+}
+
+func TestValidationEmptyServices(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Courier.SetWhitelistServices(ctx, nil)
+	if err == nil {
+		t.Error("expected error for nil services, got nil")
+	}
+}
+
+func TestValidationZeroProvinsiID(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Address.Cities(ctx, 0)
+	if err == nil {
+		t.Error("expected error for zero provinsiID, got nil")
+	}
+}
+
+func TestValidationEmptySearchQuery(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClient(kiriminaja.EnvSandbox, "")
+	_, err := client.Address.DistrictsByName(ctx, "")
+	if err == nil {
+		t.Error("expected error for empty search, got nil")
+	}
+}
+
+func TestAPIErrorOnNon2xx(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClientWithResponse(kiriminaja.EnvSandbox, 401, `{"message":"Unauthorized"}`)
+	_, err := client.Address.Provinces(ctx)
+	if err == nil {
+		t.Fatal("expected error for 401 response, got nil")
+	}
+	apiErr, ok := err.(*kahttp.APIError)
+	if !ok {
+		t.Fatalf("expected *kahttp.APIError, got %T: %v", err, err)
+	}
+	if apiErr.StatusCode != 401 {
+		t.Errorf("expected StatusCode 401, got %d", apiErr.StatusCode)
+	}
+	assertContains(t, apiErr.Body, "Unauthorized")
+}
+
+func TestAPIErrorOn500(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClientWithResponse(kiriminaja.EnvSandbox, 500, `<html>Internal Server Error</html>`)
+	_, err := client.Address.Provinces(ctx)
+	if err == nil {
+		t.Fatal("expected error for 500 response, got nil")
+	}
+	apiErr, ok := err.(*kahttp.APIError)
+	if !ok {
+		t.Fatalf("expected *kahttp.APIError, got %T: %v", err, err)
+	}
+	if apiErr.StatusCode != 500 {
+		t.Errorf("expected StatusCode 500, got %d", apiErr.StatusCode)
+	}
+}
+
+func TestMalformedJSONResponse(t *testing.T) {
+	ctx := context.Background()
+	client, _ := newMockClientWithResponse(kiriminaja.EnvSandbox, 200, `not-json`)
+	_, err := client.Address.Provinces(ctx)
+	if err == nil {
+		t.Error("expected error for malformed JSON, got nil")
+	}
 }
