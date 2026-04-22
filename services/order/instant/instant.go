@@ -18,6 +18,16 @@ func New(client *kahttp.Client) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, payload types.InstantPickupPayload) (*types.CreateInstantPickupResponse, error) {
+	switch {
+	case payload.Service == "":
+		return nil, errors.New("payload.Service must not be empty")
+	case payload.ServiceType == "":
+		return nil, errors.New("payload.ServiceType must not be empty")
+	case payload.Vehicle == "":
+		return nil, errors.New("payload.Vehicle must not be empty")
+	case len(payload.Packages) == 0:
+		return nil, errors.New("payload.Packages must not be empty")
+	}
 	return kahttp.PostJSON[types.CreateInstantPickupResponse](ctx, s.client, "/api/mitra/v4/instant/pickup/request", payload)
 }
 

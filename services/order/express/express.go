@@ -39,5 +39,19 @@ func (s *Service) Cancel(ctx context.Context, awb, reason string) (*types.Cancel
 }
 
 func (s *Service) RequestPickup(ctx context.Context, payload types.RequestPickupPayload) (*types.KAResponse, error) {
+	switch {
+	case payload.Name == "":
+		return nil, errors.New("payload.Name must not be empty")
+	case payload.Phone == "":
+		return nil, errors.New("payload.Phone must not be empty")
+	case payload.Address == "":
+		return nil, errors.New("payload.Address must not be empty")
+	case payload.KecamatanID <= 0:
+		return nil, errors.New("payload.KecamatanID must be greater than 0")
+	case payload.Schedule == "":
+		return nil, errors.New("payload.Schedule must not be empty")
+	case len(payload.Packages) == 0:
+		return nil, errors.New("payload.Packages must not be empty")
+	}
 	return kahttp.PostJSON[types.KAResponse](ctx, s.client, "/api/mitra/v6.1/request_pickup", payload)
 }
