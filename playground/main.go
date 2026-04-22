@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -14,7 +15,7 @@ func main() {
 		APIKey: os.Getenv("KIRIMINAJA_API_KEY"),
 	})
 
-	provinces, err := client.Address.Provinces()
+	provinces, err := client.Address.Provinces(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
