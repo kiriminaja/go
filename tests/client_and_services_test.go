@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	kiriminaja "github.com/kiriminaja/go"
-	kahttp "github.com/kiriminaja/go/http"
 	"github.com/kiriminaja/go/config"
+	kahttp "github.com/kiriminaja/go/http"
 	"github.com/kiriminaja/go/types"
 )
 
@@ -72,7 +72,7 @@ func newMockClient(env config.Env, apiKey string) (*kiriminaja.Client, *mockTran
 func newMockClientWithResponse(env config.Env, status int, response string) (*kiriminaja.Client, *mockTransport) {
 	transport := &mockTransport{status: status, response: response}
 	client := kiriminaja.New(kiriminaja.Config{
-		Env:    env,
+		Env: env,
 		HTTPClient: &http.Client{
 			Transport: transport,
 		},
@@ -419,6 +419,28 @@ func TestPaymentGetPaymentEndpoint(t *testing.T) {
 	assertEqual(t, transport.calls[0].Method, "POST")
 	assertEqual(t, transport.calls[0].Header.Get("Content-Type"), "application/json")
 	assertEqual(t, transport.calls[0].Body, `{"payment_id":"PAY123"}`)
+}
+
+func TestCreditBalanceEndpoint(t *testing.T) {
+	ctx := context.Background()
+	client, transport := newMockClientWithResponse(
+		kiriminaja.EnvSandbox,
+		200,
+		`{"status":true,"text":"ok","method":"GET","code":"200","data":{"balance":125000}}`,
+	)
+	resp, err := client.Credit.Balance(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	assertContains(t, transport.calls[0].URL, "/api/mitra/v6.2/credit/balance")
+	assertEqual(t, transport.calls[0].Method, "GET")
+	assertEqual(t, transport.calls[0].Body, "")
+	if !resp.Status {
+		t.Errorf("expected status=true, got %v", resp.Status)
+	}
+	if resp.Data.Balance != 125000 {
+		t.Errorf("expected balance=125000, got %v", resp.Data.Balance)
+	}
 }
 
 func TestCoverageAreaDelegatesAddressMethods(t *testing.T) {

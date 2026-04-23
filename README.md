@@ -263,6 +263,16 @@ client.Payment.GetPayment("PAY123")
 
 ---
 
+### Credit
+
+```go
+// Get the current KiriminAja credit balance
+balance, err := client.Credit.Balance(ctx)
+// balance.Data.Balance -> float64
+```
+
+---
+
 ## Development
 
 ```bash

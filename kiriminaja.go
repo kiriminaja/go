@@ -9,6 +9,7 @@ import (
 	"github.com/kiriminaja/go/services/address"
 	"github.com/kiriminaja/go/services/courier"
 	coveragearea "github.com/kiriminaja/go/services/coverage_area"
+	"github.com/kiriminaja/go/services/credit"
 	"github.com/kiriminaja/go/services/order"
 	"github.com/kiriminaja/go/services/payment"
 	"github.com/kiriminaja/go/services/pickup"
@@ -28,6 +29,7 @@ type Client struct {
 	Address      *address.Service
 	Courier      *courier.Service
 	CoverageArea *coveragearea.Service
+	Credit       *credit.Service
 	Order        *order.Service
 	Payment      *payment.Service
 	Pickup       *pickup.Service
@@ -60,6 +62,7 @@ func New(cfg Config) *Client {
 		Address:      address.New(kc),
 		Courier:      courier.New(kc),
 		CoverageArea: coveragearea.New(kc),
+		Credit:       credit.New(kc),
 		Order:        order.New(kc),
 		Payment:      payment.New(kc),
 		Pickup:       pickup.New(kc),
