@@ -31,7 +31,7 @@ type ExpressTrackingLocation struct {
 	Address string `json:"address"`
 	Phone   string `json:"phone"`
 	City    string `json:"city"`
-	ZipCode any    `json:"zip_code"`
+	ZipCode string `json:"zip_code"`
 }
 
 type ExpressTrackingDetails struct {

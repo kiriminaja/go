@@ -4,9 +4,9 @@ type PricingExpressPayload struct {
 	Origin      int      `json:"origin"`
 	Destination int      `json:"destination"`
 	Weight      int      `json:"weight"`
-	ItemValue   any      `json:"item_value"`
+	ItemValue   int      `json:"item_value"`
 	Insurance   int      `json:"insurance"`
-	Courier     []string `json:"courier"`
+	Courier     []ExpressService `json:"courier"`
 }
 
 type PricingInstantLocationPayload struct {
@@ -40,7 +40,7 @@ type PricingInstantPayload struct {
 	Timezone    string                        `json:"timezone"`
 }
 
-type ExpressService = string
+type ExpressService string
 
 const (
 	ExpressServiceTiki         ExpressService = "tiki"
