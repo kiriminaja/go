@@ -271,6 +271,22 @@ balance, err := client.Credit.Balance(ctx)
 // balance.Data.Balance -> float64
 ```
 
+### Utilities — Volumetric
+
+Estimate the smallest bounding box (WxLxH) for a multi-item package by
+trying vertical / horizontal / side-by-side stacking and returning the
+arrangement with the smallest volume.
+
+```go
+import "github.com/kiriminaja/go/utils/volumetric"
+
+dim := volumetric.Calculate([]volumetric.Item{
+    {Qty: 2, Length: 10, Width: 10, Height: 2},
+    {Qty: 1, Length: 5,  Width: 5,  Height: 5},
+})
+// dim.Length, dim.Width, dim.Height
+```
+
 ---
 
 ## Development
