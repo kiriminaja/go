@@ -270,6 +270,21 @@ func TestExpressRequestPickupEndpoint(t *testing.T) {
 				COD:                    0,
 				PackageTypeID:          7,
 				ItemName:               "TEST Item name",
+				Items: []types.RequestPickupItem{
+					{
+						Name:   "Kaos Polos",
+						Price:  125000,
+						Qty:    2,
+						Weight: 260,
+						Width:  4,
+						Length: 4,
+						Height: 4,
+						Metadata: &types.RequestPickupItemMetadata{
+							SKU:          "KP-001",
+							VariantLabel: "Merah / L",
+						},
+					},
+				},
 			},
 		},
 	}

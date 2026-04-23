@@ -1,28 +1,45 @@
 package types
 
+type RequestPickupItemMetadata struct {
+	SKU          string `json:"sku,omitempty"`
+	VariantLabel string `json:"variant_label,omitempty"`
+}
+
+type RequestPickupItem struct {
+	Name     string                     `json:"name"`
+	Price    int                        `json:"price"`
+	Qty      int                        `json:"qty"`
+	Weight   int                        `json:"weight"`
+	Width    int                        `json:"width,omitempty"`
+	Length   int                        `json:"length,omitempty"`
+	Height   int                        `json:"height,omitempty"`
+	Metadata *RequestPickupItemMetadata `json:"metadata,omitempty"`
+}
+
 type RequestPickupPackage struct {
-	OrderID                string  `json:"order_id"`
-	DestinationName        string  `json:"destination_name"`
-	DestinationPhone       string  `json:"destination_phone"`
-	DestinationAddress     string  `json:"destination_address"`
-	DestinationKecamatanID int     `json:"destination_kecamatan_id"`
-	DestinationKelurahanID int     `json:"destination_kelurahan_id,omitempty"`
-	DestinationZipcode     string  `json:"destination_zipcode,omitempty"`
-	Weight                 int     `json:"weight"`
-	Width                  int     `json:"width"`
-	Length                 int     `json:"length"`
-	Height                 int     `json:"height"`
-	Qty                    int     `json:"qty,omitempty"`
-	ItemValue              int     `json:"item_value"`
-	ShippingCost           int     `json:"shipping_cost"`
-	Service                string  `json:"service"`
-	ServiceType            string  `json:"service_type"`
-	InsuranceAmount        float64 `json:"insurance_amount,omitempty"`
-	COD                    int     `json:"cod"`
-	PackageTypeID          int     `json:"package_type_id"`
-	ItemName               string  `json:"item_name"`
-	Drop                   bool    `json:"drop,omitempty"`
-	Note                   string  `json:"note,omitempty"`
+	OrderID                string              `json:"order_id"`
+	DestinationName        string              `json:"destination_name"`
+	DestinationPhone       string              `json:"destination_phone"`
+	DestinationAddress     string              `json:"destination_address"`
+	DestinationKecamatanID int                 `json:"destination_kecamatan_id"`
+	DestinationKelurahanID int                 `json:"destination_kelurahan_id,omitempty"`
+	DestinationZipcode     string              `json:"destination_zipcode,omitempty"`
+	Weight                 int                 `json:"weight"`
+	Width                  int                 `json:"width"`
+	Length                 int                 `json:"length"`
+	Height                 int                 `json:"height"`
+	Qty                    int                 `json:"qty,omitempty"`
+	ItemValue              int                 `json:"item_value"`
+	ShippingCost           int                 `json:"shipping_cost"`
+	Service                string              `json:"service"`
+	ServiceType            string              `json:"service_type"`
+	InsuranceAmount        float64             `json:"insurance_amount,omitempty"`
+	COD                    int                 `json:"cod"`
+	PackageTypeID          int                 `json:"package_type_id"`
+	ItemName               string              `json:"item_name"`
+	Items                  []RequestPickupItem `json:"items,omitempty"`
+	Drop                   bool                `json:"drop,omitempty"`
+	Note                   string              `json:"note,omitempty"`
 }
 
 type RequestPickupPayload struct {

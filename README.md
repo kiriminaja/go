@@ -159,6 +159,23 @@ client.Order.Express.RequestPickup(types.RequestPickupPayload{
             COD:                    0,
             PackageTypeID:          7,
             ItemName:               "TEST Item name",
+            // Items is optional. When provided, it lists the individual
+            // items contained in the package. item_value is still required.
+            Items: []types.RequestPickupItem{
+                {
+                    Name:   "Kaos Polos",
+                    Price:  125000,
+                    Qty:    2,
+                    Weight: 260,
+                    Width:  4,
+                    Length: 4,
+                    Height: 4,
+                    Metadata: &types.RequestPickupItemMetadata{
+                        SKU:          "KP-001",
+                        VariantLabel: "Merah / L",
+                    },
+                },
+            },
         },
     },
 })
