@@ -7,12 +7,15 @@ import (
 	"github.com/kiriminaja/go/config"
 	kahttp "github.com/kiriminaja/go/http"
 	"github.com/kiriminaja/go/services/address"
+	"github.com/kiriminaja/go/services/awb"
+	"github.com/kiriminaja/go/services/calculations"
 	"github.com/kiriminaja/go/services/courier"
 	coveragearea "github.com/kiriminaja/go/services/coverage_area"
 	"github.com/kiriminaja/go/services/credit"
 	"github.com/kiriminaja/go/services/order"
 	"github.com/kiriminaja/go/services/payment"
 	"github.com/kiriminaja/go/services/pickup"
+	"github.com/kiriminaja/go/services/profile"
 )
 
 type Env = config.Env
@@ -27,12 +30,15 @@ const defaultTimeout = 30 * time.Second
 
 type Client struct {
 	Address      *address.Service
+	AWB          *awb.Service
+	Calculations *calculations.Service
 	Courier      *courier.Service
 	CoverageArea *coveragearea.Service
 	Credit       *credit.Service
 	Order        *order.Service
 	Payment      *payment.Service
 	Pickup       *pickup.Service
+	Profile      *profile.Service
 
 	httpClient *kahttp.Client
 }
@@ -60,12 +66,15 @@ func New(cfg Config) *Client {
 
 	return &Client{
 		Address:      address.New(kc),
+		AWB:          awb.New(kc),
+		Calculations: calculations.New(kc),
 		Courier:      courier.New(kc),
 		CoverageArea: coveragearea.New(kc),
 		Credit:       credit.New(kc),
 		Order:        order.New(kc),
 		Payment:      payment.New(kc),
 		Pickup:       pickup.New(kc),
+		Profile:      profile.New(kc),
 		httpClient:   kc,
 	}
 }

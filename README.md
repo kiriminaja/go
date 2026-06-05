@@ -271,6 +271,47 @@ balance, err := client.Credit.Balance(ctx)
 // balance.Data.Balance -> float64
 ```
 
+---
+
+### AWB (Print Waybill)
+
+```go
+// Print shipping label / waybill by AWB number(s)
+res, err := client.AWB.Print(ctx, &types.PrintAWBRequest{
+    AWB: []string{"AWB123", "AWB456"},
+})
+// res.Data.Data.URL -> PDF download URL
+```
+
+---
+
+### Calculations (COD)
+
+```go
+// Calculate COD (Cash on Delivery) fee
+res, err := client.Calculations.COD(ctx, &types.CalculateCODRequest{
+    ItemPrice: 100000,
+    Data: []types.CalculateCODDataItem{
+        {
+            CourierCode:        "jne",
+            CourierServiceCode: "reg",
+            ShippingCost:       10000,
+        },
+    },
+})
+// res.Results -> slice of fee breakdown per courier/service
+```
+
+---
+
+### Profile
+
+```go
+// Get member profile and metadata
+res, err := client.Profile.Get(ctx)
+// res.Results.ID, res.Results.Email, res.Results.Name, res.Results.Metadata
+```
+
 ### Utilities — Volumetric
 
 Estimate the smallest bounding box (WxLxH) for a multi-item package by
